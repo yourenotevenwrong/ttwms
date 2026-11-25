@@ -1,0 +1,58 @@
+{{define "setup"}}{{template "base" .}}{{end}}
+{{define "setup-content"}}
+{{$page := .Setup}}
+<section class="panel">
+  <p class="eyebrow">Warehouse setup</p>
+  <h1>{{$page.Heading}}</h1>
+  {{if $page.Saved}}<p class="message success" role="status">Changes saved.</p>{{end}}
+  <div class="table-scroll">
+  <table>
+    <caption class="visually-hidden">Configured {{$page.Heading}}</caption>
+    <thead><tr><th scope="col">Code</th>
+      {{if eq $page.Kind "locations"}}<th scope="col">Barcode</th><th scope="col">Type</th><th scope="col">Zone</th><th scope="col">Active</th>
+      {{else if eq $page.Kind "trolleys"}}<th scope="col">Barcode</th><th scope="col">Status</th><th scope="col">Order capacity</th>
+      {{else}}<th scope="col">Status</th><th scope="col">Printer</th><th scope="col">Label format</th>{{end}}
+      <th scope="col">Actions</th></tr></thead>
+    <tbody>{{range $page.Items}}<tr><th scope="row">{{.Code}}</th>
+      {{if eq $page.Kind "locations"}}<td>{{.Barcode}}</td><td>{{.LocationType}}</td><td>{{.Zone}}</td><td>{{if .Active}}Yes{{else}}No{{end}}</td>
+      {{else if eq $page.Kind "trolleys"}}<td>{{.Barcode}}</td><td>{{if eq .Status "active"}}Active{{else}}Out of service{{end}}</td><td>{{if .CapacityOrders}}{{.CapacityOrders}}{{else}}Unspecified{{end}}</td>
+      {{else}}<td>{{if eq .Status "active"}}Active{{else}}Out of service{{end}}</td><td>{{.PrinterName}}</td><td>{{.PrinterFormat}}</td>{{end}}
+      <td><a href="/setup/{{$page.Kind}}/{{.ID}}" aria-label="Edit {{.Code}}">Edit</a></td>
+    </tr>{{else}}<tr><td colspan="6">No {{$page.Heading}} configured yet.</td></tr>{{end}}</tbody>
+  </table>
+  </div>
+</section>
+<section class="panel form-panel">
+  <h2>{{if $page.Form.ID}}Edit{{else}}Add{{end}} {{$page.Singular}}</h2>
+  {{if $page.Errors}}<div class="message error" role="alert"><p>Please review the following:</p><ul>{{range $field, $message := $page.Errors}}<li>{{$message}}</li>{{end}}</ul></div>{{end}}
+  <form method="post" action="/setup/{{$page.Kind}}{{if $page.Form.ID}}/{{$page.Form.ID}}{{end}}">
+    <label for="code">Code</label>
+    <input id="code" name="code" value="{{$page.Form.Code}}" required maxlength="100" {{if index $page.Errors "code"}}aria-invalid="true"{{end}} placeholder="{{if eq $page.Kind "locations"}}LOC-PICK-001{{else if eq $page.Kind "trolleys"}}TROLLEY-001{{else}}PACK-01{{end}}">
+    {{if ne $page.Kind "packing-stations"}}
+    <label for="barcode">Barcode</label>
+    <input id="barcode" name="barcode" value="{{$page.Form.Barcode}}" required maxlength="200" {{if index $page.Errors "barcode"}}aria-invalid="true"{{end}}>
+    {{end}}
+    {{if eq $page.Kind "locations"}}
+    <label for="location_type">Type</label>
+    <select id="location_type" name="location_type" required>
+      <option value="receiving" {{if eq $page.Form.LocationType "receiving"}}selected{{end}}>Receiving</option>
+      <option value="pick" {{if eq $page.Form.LocationType "pick"}}selected{{end}}>Storage / pick</option>
+      <option value="staging" {{if eq $page.Form.LocationType "staging"}}selected{{end}}>Packing / staging</option>
+      <option value="returns" {{if eq $page.Form.LocationType "returns"}}selected{{end}}>Returns</option>
+      <option value="damaged" {{if eq $page.Form.LocationType "damaged"}}selected{{end}}>Damaged / quarantine</option>
+    </select>
+    <label for="zone">Zone (optional)</label><input id="zone" name="zone" value="{{$page.Form.Zone}}" maxlength="100">
+    <label class="checkbox"><input type="checkbox" name="active" {{if $page.Form.Active}}checked{{end}}> Active</label>
+    {{else}}
+    <label for="status">Status</label>
+    <select id="status" name="status" required><option value="active" {{if eq $page.Form.Status "active"}}selected{{end}}>Active</option><option value="out_of_service" {{if eq $page.Form.Status "out_of_service"}}selected{{end}}>Out of service</option></select>
+    {{if eq $page.Kind "trolleys"}}
+    <label for="capacity_orders">Order capacity (optional)</label><input id="capacity_orders" name="capacity_orders" type="number" min="1" max="2147483647" step="1" value="{{$page.Capacity}}" {{if index $page.Errors "capacity_orders"}}aria-invalid="true"{{end}}>
+    {{else}}
+    <label for="printer_name">Printer name (optional)</label><input id="printer_name" name="printer_name" value="{{$page.Form.PrinterName}}" maxlength="200">
+    <label for="printer_format">Label format (optional)</label><input id="printer_format" name="printer_format" value="{{$page.Form.PrinterFormat}}" maxlength="100" placeholder="e.g. 100 × 150 mm">
+    {{end}}{{end}}
+    <div class="form-actions"><button type="submit">Save {{$page.Singular}}</button>{{if $page.Form.ID}}<a href="/setup/{{$page.Kind}}">Cancel editing</a>{{end}}</div>
+  </form>
+</section>
+{{end}}

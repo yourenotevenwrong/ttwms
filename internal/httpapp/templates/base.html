@@ -5,10 +5,14 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>{{.Title}}</title>
   <link rel="stylesheet" href="/static/app.css">
-  <script src="/static/htmx.min.js" defer></script>
 </head>
 <body>
-  <header class="topbar"><strong>TT WMS</strong><span class="badge">{{.Environment}}</span></header>
-  <main>{{template "content" .}}</main>
+  <header class="topbar"><a href="/">TT WMS</a><span class="badge">{{.Environment}}</span></header>
+  {{if .SetupEnabled}}<nav class="navigation" aria-label="Warehouse setup">
+    <a href="/setup/locations">Locations</a>
+    <a href="/setup/trolleys">Trolleys</a>
+    <a href="/setup/packing-stations">Packing stations</a>
+  </nav>{{end}}
+  <main>{{if .Setup}}{{template "setup-content" .}}{{else}}{{template "home-content" .}}{{end}}</main>
 </body>
 </html>{{end}}

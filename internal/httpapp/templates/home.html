@@ -1,12 +1,14 @@
 {{define "home"}}{{template "base" .}}{{end}}
-{{define "content"}}
+{{define "home-content"}}
 <section class="panel">
   <p class="eyebrow">TikTok-first warehouse management</p>
-  <h1>Foundation running</h1>
-  <p>The Go application is ready for warehouse setup, catalogue sync, and inventory development.</p>
+  <h1>Warehouse setup</h1>
+  {{if .SetupEnabled}}<p>Configure your locations, reusable trolleys, and packing stations.</p>
+  <p><a class="button" href="/setup/locations">Set up locations</a></p>
+  {{else}}<p>Warehouse setup is available in development and test environments when PostgreSQL is configured.</p>{{end}}
   <div class="grid">
     <article><strong>Catalogue</strong><span>Pending TikTok connection</span></article>
-    <article><strong>Inventory</strong><span>Ledger schema ready</span></article>
+    <article><strong>Inventory</strong><span>Not yet implemented</span></article>
     <article><strong>Fulfilment</strong><span>Workflow specified</span></article>
   </div>
 </section>

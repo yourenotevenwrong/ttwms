@@ -15,6 +15,20 @@ func TestDefaultsAllowRunningWithoutDatabase(t *testing.T) {
 	}
 }
 
+func TestDeployedEnvironmentsRequireDatabase(t *testing.T) {
+	for _, environment := range []Environment{Staging, Production} {
+		_, err := load(func(key string) string {
+			if key == "APP_ENV" {
+				return string(environment)
+			}
+			return ""
+		})
+		if err == nil || !strings.Contains(err.Error(), "DATABASE_URL") {
+			t.Fatalf("%s accepted missing database: %v", environment, err)
+		}
+	}
+}
+
 func TestLoadEnvironment(t *testing.T) {
 	for _, environment := range []Environment{Development, Test, Staging, Production} {
 		t.Run(string(environment), func(t *testing.T) {

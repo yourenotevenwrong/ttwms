@@ -24,8 +24,8 @@ type Config struct {
 	DatabaseURL string
 }
 
-// Load reads and validates process environment variables. It does not connect to
-// the database; an empty database URL is allowed while persistence is optional.
+// Load reads and validates process environment variables. It does not read .env
+// implicitly or connect to the database. Development and test may omit a database.
 func Load() (Config, error) {
 	return load(os.Getenv)
 }
@@ -66,6 +66,9 @@ func load(getenv func(string) string) (Config, error) {
 		if _, err := url.ParseQuery(u.RawQuery); err != nil {
 			return Config{}, errors.New("DATABASE_URL must have valid query parameters")
 		}
+	}
+	if cfg.DatabaseURL == "" && (cfg.Environment == Staging || cfg.Environment == Production) {
+		return Config{}, errors.New("DATABASE_URL is required in staging and production")
 	}
 	return cfg, nil
 }

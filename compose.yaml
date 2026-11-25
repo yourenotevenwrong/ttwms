@@ -21,8 +21,7 @@ services:
       POSTGRES_USER: ttwms
       POSTGRES_PASSWORD: ttwms
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./migrations:/docker-entrypoint-initdb.d:ro
+      - postgres_data:/var/lib/postgresql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ttwms -d ttwms"]
       interval: 5s
